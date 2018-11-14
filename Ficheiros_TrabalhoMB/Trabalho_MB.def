@@ -1,0 +1,68 @@
+%\documentclass[11pt,a4paper]{article}
+\documentclass[a5paper,portuguese,twoside,10pt]{article}
+\usepackage[a5paper]{geometry}
+
+\parindent 0pt
+
+\newcommand{\titulo}[1]{\Large{\textbf{#1}\vspace*{.2cm}} }
+\newcommand{\autor}[2]{\normalsize{\textsf{#1 #2} \index{\textbf{#2}, #1}}}
+\newcommand{\afil}[2]{\mbox{} \\ #1, \textit{#2} \vspace*{.1cm} \\}
+\newcommand{\pchave}[1]{{\textbf{Palavras--chave}: #1\\}\vspace{-0.2cm}}
+
+\newcommand\halmos{\rule{0.1in}{0.1in}}
+\newtheorem{teorema}{Teorema}[section]
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{proposicao}[teorema]{Proposi\c{c}\~{a}o}
+\newtheorem{corolario}[teorema]{Corol\'{a}rio}
+\newtheorem{definicao}[teorema]{Defini\c{c}\~{a}o}
+\newtheorem{exemplo}[teorema]{Exemplo}
+\newtheorem{algoritmo}[teorema]{Algoritmo}
+\newtheorem{observacao}[teorema]{Observa\c{c}\~{a}o}
+\newenvironment{demonstracao}{\par
+  \trivlist
+  \item[\hskip\labelsep
+        \itshape
+    Dem.\textup{:}]\ignorespaces
+}{\hfill$\halmos$\endtrivlist
+}
+\newcommand{\bibliografia}[1]{{\small \begin{thebibliography}{99} #1 \end{thebibliography}}}
+
+\renewcommand\refname{Refer\^{e}ncias}
+\renewcommand\figurename{Figura}
+\renewcommand\tablename{Tabela}
+
+
+\usepackage[portuguese]{babel}
+\usepackage{ae}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{amssymb,amsmath}
+\usepackage{bm} 
+%\usepackage[utf8]{inputenc}  
+\usepackage[latin1]{inputenc}
+\usepackage{imakeidx} 
+\makeindex[title={\'{I}ndice de Autores},columns=2] 
+
+\usepackage{eurosym}
+\usepackage{icomma}
+\usepackage{url}
+\usepackage{color}
+\usepackage{subfigure}
+
+%\usepackage{afterpage}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\pagestyle{empty}
+%\usepackage[font=small,format=plain,labelfont=bf,up,up]{caption}
+%\captionsetup[figure]{name=Figura}
+\usepackage{amssymb}
+\usepackage{wasysym}
+\usepackage[usenames,dvipsnames]{xcolor}
+
+%\usepackage{layout}
+%\setlength{\oddsidemargin}{24pt}
+%\setlength{\evensidemargin}{24pt}
+%\setlength{\footskip}{50pt}
+% \setlength{\textheight}{170pt}
+
+
