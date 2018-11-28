@@ -15,13 +15,14 @@ dim(concelhos@data) #3223 freguesias
 concelhos_data<-concelhos@data
 concelhos_data
 
+#a
 ##################################
 #criar a spatial weights objet a partir da SpatialPolygonsDataframe distritos
 #primeiro a objeto da classe nb e em seguida a listw
 
 library(spdep)
 
-###Estrutura de Vizinhan¸cas - para Concelhos
+###Estrutura de Vizinhanças - para Concelhos
 concelhos_nb <- poly2nb(concelhos, row.names = NULL)
 class(concelhos_nb)
 concelhos_nb
@@ -70,4 +71,97 @@ title(main="Indice Rural 2016")
 legend("bottomright", fill=attr(PrId_CIc, "palette"),
        legend=names(attr(PrId_CIc, "table")), bty="n")
 dev.off()
+
+#b
+
+####Dependência Espacial###################
+#Moran I-Concelhos
+moran.test(dados2016$Escolaridade,concelhos_listw,alternative="two.sided")
+moran.test(dados2016$IndRural,concelhos_listw,alternative="two.sided")
+
+moran.test(dados2016$Escolaridade,concelhos_listw,
+           randomisation=FALSE,alternative="two.sided")
+
+moran.test(dados2016$IndRural,concelhos_listw,
+           randomisation=FALSE,alternative="two.sided")
+#Grafico de Moran
+moran.plot(dados2016$Rendim,concelhos_listw,
+           xlab="Rendimento", ylab="")
+moran.plot(dados2016$Escolaridade,concelhos_listw,
+           xlab="Escolaridade", ylab="")
+moran.plot(dados2016$IndRural,concelhos_listw,
+           xlab="IndRural", ylab="")
+######Testes Normalidade Escolaridae###############
+xb <- mean(dados2016$Escolaridade)
+sx <- sd(dados2016$Escolaridade)
+t1 <- ks.test(dados2016$Escolaridade, "pnorm", xb, sx)
+t1
+t2 <- shapiro.test(dados2016$Escolaridade)
+t2
+
+######Testes Normalidade IndRural###############
+xb <- mean(dados2016$IndRural)
+sx <- sd(dados2016$IndRural)
+t1 <- ks.test(dados2016$IndRural, "pnorm", xb, sx)
+t1
+t2 <- shapiro.test(dados2016$IndRural)
+t2
+##Correlaçãao entre variáveis
+corr <- cor(dados2016 [,2:14])
+round(corr, 2)
+####Modelo glm-Classico##
+
+Escolaridade<-glm(Escolaridade ~ IndRural + Rendimento,
+                     family=gaussian,data=dados2016)
+
+summary(Escolaridade)
+moran.test(Escolaridade$residuals,concelhos_listw,alternative="two.sided")
+
+library("CARBayes")
+#Modelo glm Bayesiano-MCMC##################
+modelo.glm<-S.glm(formula=Escolaridade ~IndRural+ Rendimento,
+                  family="gaussian", data=dados2016, burnin=20000, n.sample= 100000,thin=10)
+print(modelo.glm)
+moran.test(modelo.glm$residuals$response,concelhos_listw,alternative="two.sided")
+
+###An´alise Espacial hier´arquica###########
+W.concelhos<-nb2mat(concelhos_nb,style="B",zero.policy=T)
+#Modelo com covari´aveis e efeitos espaciais estruturados utilizando modelo de Leroux
+modeloLeroux.1<-S.CARleroux(formula=Escolaridade ~IndRural+ Rendimento,
+                            family="gaussian", data=dados2016,W=W.concelhos,
+                            burnin=20000, n.sample=100000,thin=10)
+print(modeloLeroux.1)
+modeloLeroux.1$modelfit
+#Gr´afico Efeitos Aleatorios Leroux modelo 1###
+names(modeloLeroux.1$samples)
+summary(modeloLeroux.1$samples$phi)
+head(modeloLeroux.1$fitted.values)
+c.quentes <- colorRampPalette(c("yellow1", "red"))
+
+phi<-colMeans(modeloLeroux.1$samples$phi)
+summary(phi)
+length(phi)
+brks <- c(-0.1,-0.01,-0.005,0,0.005,0.01,0.1)
+library(classInt)
+phi_CI <- classIntervals(phi, style = "fixed", fixedBreaks = brks)
+
+phi_CIc <- findColours(phi_CI, c.quentes(6))
+pdf("EfeitosaleatoriosLeroux_1.pdf")
+plot(concelhos, col=phi_CIc)
+title(main="EfeitosaleatoriosLeroux_1")
+legend("bottomright", fill=attr(phi_CIc, "palette"),
+       legend=names(attr(phi_CIc, "table")), bty="n")
+dev.off()
+head(modeloLeroux.1$samples$beta)
+#Ind Rural
+mean(modeloLeroux.1$samples$beta[,2])
+plot(modeloLeroux.1$samples$beta[,3])
+#Perc. Pop ativa/Centros Saude
+mean(modeloLeroux.1$samples$beta[,2])
+plot(modeloLeroux.1$samples$beta[,3])
+moran.test(modeloLeroux.1$residuals$response,concelhos_listw,
+           alternative="two.sided")
+moran.plot(modeloLeroux.1$residuals$response,concelhos_listw,
+           xlab="Modelo Leroux1_resid", ylab="")
+
 
