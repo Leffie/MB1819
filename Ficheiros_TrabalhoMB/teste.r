@@ -4,7 +4,7 @@ library(maptools)
 
 # set working directory
 # setwd("..")
-# setwd("Users/David/Desktop/ISEL/MB/Ficheiros_TrabalhoMB")
+# setwd("Users/David/Desktop/ISEL/MB/MB1819/Ficheiros_TrabalhoMB")
 #Ler ficheiro Shapefile concelhos:
 
 ogrInfo(".", "Portugal_Municipios") #arguments: Where the data is stored, file name
@@ -21,16 +21,15 @@ concelhos_data
 #primeiro a objeto da classe nb e em seguida a listw
 
 library(spdep)
-
-###Estrutura de Vizinhanças - para Concelhos
+###Estrutura de Vizinhan¸cas - para Concelhos
 concelhos_nb <- poly2nb(concelhos, row.names = NULL)
 class(concelhos_nb)
 concelhos_nb
 card(concelhos_nb)
 summary.nb(concelhos_nb)
-concelhos_listw<-nb2listw(concelhos_nb)
 
 ###,style="W",zero.policy=T)
+concelhos_listw<-nb2listw(concelhos_nb)
 class(concelhos_listw)
 concelhos_listw
 concelhos_listw$weights
@@ -42,29 +41,31 @@ names(dados2016)
 dim(dados2016)
 summary(dados2016)
 # ###################################################################
-# ### Mapas de cores Escolaridade
+# ### Mapas de cores Rendimento
 library(maptools)
 library(sp)
-c.quentes <- colorRampPalette(c("green", "red"))
-summary(dados2016$Escolaridade)
-brks <- c(4,5,6,7,8,9,10,11)
+library(RColorBrewer)
+cols <- brewer.pal(3, "BuGn")
+c.colors <- colorRampPalette(c(cols))
+brks <- c(700,750,800,850,900,950,1000,1200,1550)
+summary(dados2016$Rendim)
 library(classInt)
-PrId_CI <- classIntervals(dados2016$Escolaridade, style = "fixed", fixedBreaks = brks)
-PrId_CIc <- findColours(PrId_CI, c.quentes(6))
-pdf("Escolaridade.pdf")
+PrId_CI <- classIntervals(dados2016$Rendim, style = "fixed",
+                          fixedBreaks=brks)
+PrId_CIc <- findColours(PrId_CI, colors(9))
+pdf("Rendimento.pdf")
 plot(concelhos, col=PrId_CIc)
-title(main="Escolaridade 2016")
+title(main="Rendimento 2016")
 legend("bottomright", fill=attr(PrId_CIc, "palette"),legend=names(attr(PrId_CIc, "table")), bty="n")
 dev.off()
 
 # Mapa de cores Indice Rural 
 
 summary(dados2016$IndRural)
-brks <- c(0,0.1,0.2,0.3,0.5,0.6,0.7,0.8,0.9)
-brks2 <- c(0,0.2,0.4,0.6)
+brks <- c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9)
 library(classInt)
 PrId_CI <- classIntervals(dados2016$IndRural, style = "fixed", fixedBreaks = brks)
-PrId_CIc <- findColours(PrId_CI, c.quentes(6))
+PrId_CIc <- findColours(PrId_CI, c.colors(10))
 pdf("IndRural.pdf")
 plot(concelhos, col=PrId_CIc)
 title(main="Indice Rural 2016")
@@ -72,12 +73,28 @@ legend("bottomright", fill=attr(PrId_CIc, "palette"),
        legend=names(attr(PrId_CIc, "table")), bty="n")
 dev.off()
 
-#b
+# ###################################################################
+# ### Mapas de cores Escolaridade
+summary(dados2016$Escolaridade)
+brks <- c(4,5,6,7,8,9,10,11)
+library(classInt)
+PrId_CI <- classIntervals(dados2016$Escolaridade, style = "fixed", fixedBreaks = brks)
+PrId_CIc <- findColours(PrId_CI, c.colors(8))
+pdf("Escolaridade.pdf")
+plot(concelhos, col=PrId_CIc)
+title(main="Escolaridade 2016")
+legend("bottomright", fill=attr(PrId_CIc, "palette"),legend=names(attr(PrId_CIc, "table")), bty="n")
+dev.off()
 
 ####Dependência Espacial###################
 #Moran I-Concelhos
 moran.test(dados2016$Escolaridade,concelhos_listw,alternative="two.sided")
 moran.test(dados2016$IndRural,concelhos_listw,alternative="two.sided")
+
+moran.test(dados2016$Rendim,concelhos_listw,alternative="two.sided")
+
+moran.test(dados2016$Rendim,concelhos_listw,
+           randomisation=FALSE,alternative="two.sided")
 
 moran.test(dados2016$Escolaridade,concelhos_listw,
            randomisation=FALSE,alternative="two.sided")
